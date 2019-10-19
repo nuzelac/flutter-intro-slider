@@ -469,6 +469,12 @@ class IntroSliderState extends State<IntroSlider>
   int currentTabIndex = 0;
 
   @override
+  void dispose() {
+    tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
 
@@ -520,58 +526,65 @@ class IntroSliderState extends State<IntroSlider>
     }
 
     tabController.animation.addListener(() {
-      this.setState(() {
-        switch (typeDotAnimation) {
-          case dotSliderAnimation.DOT_MOVEMENT:
-            marginLeftDotFocused = tabController.animation.value * sizeDot * 2;
-            marginRightDotFocused = initValueMarginRight -
-                tabController.animation.value * sizeDot * 2;
-            break;
-          case dotSliderAnimation.SIZE_TRANSITION:
-            if (tabController.animation.value == currentAnimationValue) {
+      if (this.mounted) {
+        this.setState(() {
+          switch (typeDotAnimation) {
+            case dotSliderAnimation.DOT_MOVEMENT:
+              marginLeftDotFocused =
+                  tabController.animation.value * sizeDot * 2;
+              marginRightDotFocused = initValueMarginRight -
+                  tabController.animation.value * sizeDot * 2;
               break;
-            }
-
-            double diffValueAnimation =
-                (tabController.animation.value - currentAnimationValue).abs();
-            int diffValueIndex = (currentTabIndex - tabController.index).abs();
-
-            // When press skip button
-            if (tabController.indexIsChanging &&
-                (tabController.index - tabController.previousIndex).abs() > 1) {
-              if (diffValueAnimation < 1.0) {
-                diffValueAnimation = 1.0;
+            case dotSliderAnimation.SIZE_TRANSITION:
+              if (tabController.animation.value == currentAnimationValue) {
+                break;
               }
-              sizeDots[currentTabIndex] = sizeDot * 1.5 -
-                  (sizeDot / 2) * (1 - (diffValueIndex - diffValueAnimation));
-              sizeDots[tabController.index] = sizeDot +
-                  (sizeDot / 2) * (1 - (diffValueIndex - diffValueAnimation));
-              opacityDots[currentTabIndex] =
-                  1.0 - (diffValueAnimation / diffValueIndex) / 2;
-              opacityDots[tabController.index] =
-                  0.5 + (diffValueAnimation / diffValueIndex) / 2;
-            } else {
-              if (tabController.animation.value > currentAnimationValue) {
-                // Swipe left
-                sizeDots[currentTabIndex] =
-                    sizeDot * 1.5 - (sizeDot / 2) * diffValueAnimation;
-                sizeDots[currentTabIndex + 1] =
-                    sizeDot + (sizeDot / 2) * diffValueAnimation;
-                opacityDots[currentTabIndex] = 1.0 - diffValueAnimation / 2;
-                opacityDots[currentTabIndex + 1] = 0.5 + diffValueAnimation / 2;
+
+              double diffValueAnimation =
+                  (tabController.animation.value - currentAnimationValue).abs();
+              int diffValueIndex =
+                  (currentTabIndex - tabController.index).abs();
+
+              // When press skip button
+              if (tabController.indexIsChanging &&
+                  (tabController.index - tabController.previousIndex).abs() >
+                      1) {
+                if (diffValueAnimation < 1.0) {
+                  diffValueAnimation = 1.0;
+                }
+                sizeDots[currentTabIndex] = sizeDot * 1.5 -
+                    (sizeDot / 2) * (1 - (diffValueIndex - diffValueAnimation));
+                sizeDots[tabController.index] = sizeDot +
+                    (sizeDot / 2) * (1 - (diffValueIndex - diffValueAnimation));
+                opacityDots[currentTabIndex] =
+                    1.0 - (diffValueAnimation / diffValueIndex) / 2;
+                opacityDots[tabController.index] =
+                    0.5 + (diffValueAnimation / diffValueIndex) / 2;
               } else {
-                // Swipe right
-                sizeDots[currentTabIndex] =
-                    sizeDot * 1.5 - (sizeDot / 2) * diffValueAnimation;
-                sizeDots[currentTabIndex - 1] =
-                    sizeDot + (sizeDot / 2) * diffValueAnimation;
-                opacityDots[currentTabIndex] = 1.0 - diffValueAnimation / 2;
-                opacityDots[currentTabIndex - 1] = 0.5 + diffValueAnimation / 2;
+                if (tabController.animation.value > currentAnimationValue) {
+                  // Swipe left
+                  sizeDots[currentTabIndex] =
+                      sizeDot * 1.5 - (sizeDot / 2) * diffValueAnimation;
+                  sizeDots[currentTabIndex + 1] =
+                      sizeDot + (sizeDot / 2) * diffValueAnimation;
+                  opacityDots[currentTabIndex] = 1.0 - diffValueAnimation / 2;
+                  opacityDots[currentTabIndex + 1] =
+                      0.5 + diffValueAnimation / 2;
+                } else {
+                  // Swipe right
+                  sizeDots[currentTabIndex] =
+                      sizeDot * 1.5 - (sizeDot / 2) * diffValueAnimation;
+                  sizeDots[currentTabIndex - 1] =
+                      sizeDot + (sizeDot / 2) * diffValueAnimation;
+                  opacityDots[currentTabIndex] = 1.0 - diffValueAnimation / 2;
+                  opacityDots[currentTabIndex - 1] =
+                      0.5 + diffValueAnimation / 2;
+                }
               }
-            }
-            break;
-        }
-      });
+              break;
+          }
+        });
+      }
     });
 
     // Dot indicator
